@@ -1,0 +1,211 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% University/School Laboratory Report
+% LaTeX Template
+% Version 3.1 (25/3/14)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Linux and Unix Users Group at Virginia Tech Wiki 
+% (https://vtluug.org/wiki/Example_LaTeX_chem_lab_report)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+%\usepackage[version=3]{mhchem} % Package for chemical equation typesetting
+%\usepackage{siunitx} % Provides the \SI{}{} and \si{} command for typesetting SI units
+\usepackage{graphicx} % Required for the inclusion of images
+%\usepackage{natbib} % Required to change bibliography style to APA
+%\usepackage{amsmath} % Required for some math elements 
+\usepackage{listings}
+\lstset{
+  breaklines=true,
+  basicstyle=\scriptsize,
+  columns=fullflexible
+}
+
+\usepackage{tikz}
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+\renewcommand{\labelenumi}{\alph{enumi}.} % Make numbering in the enumerate environment by letter rather than number (e.g. section 6)
+
+%\usepackage{times} % Uncomment to use the Times New Roman font
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT INFORMATION
+%----------------------------------------------------------------------------------------
+
+\title{Report: Homework 3 - IAAS Cloud Computing}% Title
+
+\author{Jan \textsc{Schlenker}} % Author name
+
+\date{\today} % Date for the report
+
+\begin{document}
+
+\maketitle % Insert the title, author and date
+
+\begin{center}
+\begin{tabular}{l l}
+Instructor: & Dipl.-Ing. Dr. Simon Ostermann \\
+Parts solved of the sheet: & Tasks 1-5 \\
+Total points: & 15
+\end{tabular}
+\end{center}
+
+% If you wish to include an abstract, uncomment the lines below
+% \begin{abstract}
+% Abstract text
+% \end{abstract}
+
+%----------------------------------------------------------------------------------------
+%	SECTION 1
+%----------------------------------------------------------------------------------------
+
+\section{How to run the programme}
+
+First of all extract the archive file \texttt{homework\_3.tar.gz}:
+
+\begin{lstlisting}[language=bash, deletekeywords={cd}]
+  $ tar -xzf homework_3.tar.gz
+  $ cd homework_3
+\end{lstlisting}
+
+Afterwards move/copy the binary files \texttt{gm} and \texttt{povray} to the \texttt{bin/} directory and the files \texttt{scherk.args}, \texttt{scherk.ini} and \texttt{scherk.pov} to the \texttt{inputdata/} directory:
+
+\begin{lstlisting}[language=bash]
+  $ cp <gm-file-path> <povray-file-path> bin/
+  $ cp <scherk-files-dir>/scherk* inputdata/
+\end{lstlisting}
+
+At last change the settings and run the main programme, e.g.:
+
+\begin{lstlisting}[language=bash]
+  $ ./main.sh 3 t2.micro
+\end{lstlisting}
+
+%\begin{center}\ce{2 Mg + O2 -> 2 MgO}\end{center}
+
+% If you have more than one objective, uncomment the below:
+%\begin{description}
+%\item[First Objective] \hfill \\
+%Objective 1 text
+%\item[Second Objective] \hfill \\
+%Objective 2 text
+%\end{description}
+
+%----------------------------------------------------------------------------------------
+%	SECTION 2
+%----------------------------------------------------------------------------------------
+
+\section{Programme explanation}
+The files of the the programme are structured as follows:
+
+\begin{itemize}
+\item The \texttt{\textbf{main.sh}} script just executes \texttt{launchInstances.sh} and \texttt{cloudRender.sh}
+\item The \texttt{\textbf{launchInstances.sh}} script contains the programme to launch multiple AWS instances
+\item The \texttt{\textbf{cloudRender.sh}} script contains the programme to do the povray worklflow on the AWS instances
+\item The \texttt{\textbf{settings}} file contains the settings for the main programme. These should be adjusted by the executor.
+\item The \texttt{\textbf{bin}} directory contains the binaries \texttt{povray} and \texttt{gm} which will be copied to the AWS instances
+\item The \texttt{\textbf{inputdata}} directory contains the necessary files for the \texttt{povray} binary which will be copied to the AWS instances
+\end{itemize}
+
+Below is the programme explanation task by task:
+
+\begin{itemize}
+
+\item \textbf{Task 1:} Only thing to mention here is that port 22 should be available. This can easily be done by creating a Security Group with the AWS-console and set an appropriate inbound type.
+\item \textbf{Task 2:} To copy the files the ssh command can be used. For that a key is necessary, which can be generated with the AWS-console as well.
+\item \textbf{Task 3:} The \texttt{launchInstances.sh} script basically uses the \texttt{aws ec2 run-instances} command with the \texttt{--count} flag to start as many instances as whished. The \texttt{--security-group-ids} flag is important for ssh use later on. Afterwards the povray files are copied to each instance.
+\item \textbf{Task 4:} The \texttt{cloudRender.sh} script reads the \texttt{scherk.ini} file to get the amount of frames and renders these frames on the different instances.
+\item \textbf{Task 5:} Both the \texttt{launchInstances.sh} and \texttt{cloudRender.sh} contain timestamps to measure the instance launching, execution and instance termination time.
+\end{itemize}
+
+
+%----------------------------------------------------------------------------------------
+%	SECTION 3
+%----------------------------------------------------------------------------------------
+
+\section{Results}
+
+Measurements were made for the instance types \texttt{t2.micro}, \texttt{m3.large}, \texttt{c4.xlarge} and \texttt{c3.2xlarge}. For all measurements the image was the default amazon image, the frame number was 64 and the number of instances was 3. Table~\ref{tab:measurements} shows the measurement results, where T$_{L}$ represents the launching, T$_{E}$ the execution and T$_{T}$ the termination time.
+\\
+\\
+The launching time and the termination time are nearly the same for each measurement. The execution time decreases with the number of CPUs. Of course the sequential part of the programme (e.g. copy files over network, create gif etc.) limits the speedup.
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{ | c | c | c | c | c | c | c | }
+\hline
+\textbf{Instance type} & \textbf{CPUs} & \textbf{T$_{L}$} in s & \textbf{T$_{E}$} in s & \textbf{T$_{T}$} in s & \textbf{Speedup} & \textbf{Efficency} \\
+\hline \hline
+t2.micro & 1 & 113,41 & 277,35 & 35,15 & - & - \\
+\hline
+m3.large & 2 & 102,31 & 240,10 & 35,41 & 1,16 & 0,58 \\
+\hline
+c4.xlarge & 4 & 109,01 & 139,21 & 35,20 & 1,99 & 0,50 \\
+\hline
+c3.2xlarge & 8 & 110,10 & 110,12 & 35,01 & 2,52 & 0,31 \\
+\hline
+%32 & 32 & 582,99 & 75,93 & 7,68 & 0,19 \\
+%\hline
+%64 & 40 & 1161,30 & 141,94 & 8,18 & 0,20 \\
+%\hline
+%128 & 40 & 2319,09 & 277,01 & 8,37 & 0,21 \\
+%\hline
+\end{tabular}
+\caption{Measurements}
+\label{tab:measurements}
+\end{table}
+%
+
+%Because of this reaction, the required ratio is the atomic weight of magnesium: \SI{16.00}{\gram} of oxygen as experimental mass of Mg: experimental mass of oxygen or $\frac{x}{1.31}=\frac{16}{0.87}$ from which, $M_{\ce{Mg}} = 16.00 \times \frac{1.31}{0.87} = 24.1 = \SI{24}{\gram\per\mole}$ (to two significant figures).
+
+%----------------------------------------------------------------------------------------
+%	SECTION 4
+%----------------------------------------------------------------------------------------
+
+%\section{Results and Conclusions}
+
+%The atomic weight of magnesium is concluded to be \SI{24}{\gram\per\mol}, as determined by the stoichiometry of its chemical combination with oxygen. This result is in agreement with the accepted value.
+
+%\begin{figure}[h]
+%\begin{center}
+%\includegraphics[width=0.65\textwidth]{placeholder} % Include the image placeholder.png
+%\caption{Figure caption.}
+%\end{center}
+%\end{figure}
+%
+%----------------------------------------------------------------------------------------
+%	SECTION 5
+%----------------------------------------------------------------------------------------
+
+%\section{Discussion of Experimental Uncertainty}
+
+%The accepted value (periodic table) is \SI{24.3}{\gram\per\mole} \cite{Smith:2012qr}. The percentage discrepancy between the accepted value and the result obtained here is 1.3\%. Because only a single measurement was made, it is not possible to calculate an estimated standard deviation.
+
+%The most obvious source of experimental uncertainty is the limited precision of the balance. Other potential sources of experimental uncertainty are: the reaction might not be complete; if not enough time was allowed for total oxidation, less than complete oxidation of the magnesium might have, in part, reacted with nitrogen in the air (incorrect reaction); the magnesium oxide might have absorbed water from the air, and thus weigh ``too much." Because the result obtained is close to the accepted value it is possible that some of these experimental uncertainties have fortuitously cancelled one another.
+
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+%\bibliographystyle{apalike}
+
+%\bibliography{sample}
+
+%----------------------------------------------------------------------------------------
+
+
+\end{document}
