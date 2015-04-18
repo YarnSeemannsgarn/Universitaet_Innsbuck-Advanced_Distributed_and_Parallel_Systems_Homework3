@@ -1,0 +1,12 @@
+####### POVRAY #######
+BIN_DIR=./bin
+INPUT_DIR=./inputdata
+
+LOG_DIR=./log
+
+####### AWS #######
+IMAGE_ID="ami-d114f295"
+KEY_NAME="Uni_Innsbruck-Parallel_Systems"
+KEY_FILE=~/.aws/$KEY_NAME.pem
+SECURITY_GROUP_ID="sg-391dac5c"
+EC2_USER="ec2-user"
